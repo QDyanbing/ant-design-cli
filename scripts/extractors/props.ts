@@ -126,6 +126,22 @@ function cleanLabel(raw: string): string {
     .trim();
 }
 
+/** Normalize localized labels used for shared component props. */
+function normalizeSectionLabel(raw: string): string {
+  const label = cleanLabel(raw);
+  if (
+    /^common\s+(api|props?|options?)$/i.test(label) ||
+    /^(?:共同|通用)(?:的)?\s*(?:API|属性|选项)$/i.test(label)
+  ) {
+    return 'Common API';
+  }
+  return label;
+}
+
+function isCommonSection(label: string): boolean {
+  return label === 'Common API';
+}
+
 /**
  * Determine whether a section heading represents the main component props.
  *
@@ -168,6 +184,86 @@ function isMainSection(label: string, componentName: string): boolean {
   if (/^common\s+(api|props?|options?)$/i.test(label)) return true;
 
   return false;
+}
+
+/** Fill empty fields in a prop definition without replacing its existing values. */
+function fillMissingPropFields(primary: PropData, fallback: PropData): PropData {
+  const result = { ...primary };
+
+  for (const key of Object.keys(fallback) as (keyof PropData)[]) {
+    const currentValue = result[key];
+    const fallbackValue = fallback[key];
+    if (
+      (currentValue === undefined || currentValue === '') &&
+      fallbackValue !== undefined &&
+      fallbackValue !== ''
+    ) {
+      Object.assign(result, { [key]: fallbackValue });
+    }
+  }
+
+  return result;
+}
+
+/** Add shared props without collapsing duplicate component-specific definitions. */
+function mergeSharedProps(componentProps: PropData[], sharedProps: PropData[]): PropData[] {
+  const result = [...componentProps];
+  const indexes = new Map<string, number[]>();
+
+  for (const [index, prop] of result.entries()) {
+    const propIndexes = indexes.get(prop.name) || [];
+    propIndexes.push(index);
+    indexes.set(prop.name, propIndexes);
+  }
+
+  for (const prop of sharedProps) {
+    const existingIndexes = indexes.get(prop.name);
+    if (!existingIndexes) {
+      indexes.set(prop.name, [result.length]);
+      result.push(prop);
+    } else {
+      for (const index of existingIndexes) {
+        result[index] = fillMissingPropFields(result[index], prop);
+      }
+    }
+  }
+
+  return result;
+}
+
+/** Read markdown and recursively expand local dumi <embed src="..."> references. */
+function readMarkdownWithEmbeds(
+  filePath: string,
+  rootDir: string,
+  stack = new Set<string>(),
+): string {
+  const resolvedPath = path.resolve(filePath);
+  const resolvedRoot = path.resolve(rootDir);
+  const relativePath = path.relative(resolvedRoot, resolvedPath);
+
+  if (
+    relativePath === '..' ||
+    relativePath.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativePath) ||
+    stack.has(resolvedPath) ||
+    !fs.existsSync(resolvedPath)
+  ) {
+    return '';
+  }
+
+  const nextStack = new Set(stack);
+  nextStack.add(resolvedPath);
+  const content = parseFrontMatter(fs.readFileSync(resolvedPath, 'utf-8')).content;
+  const embedRegex = /<embed\b[^>]*\bsrc=(["'])([^"']+)\1[^>]*>(?:\s*<\/embed>)?/gi;
+
+  return content.replace(embedRegex, (match, _quote: string, src: string) => {
+    const embedded = readMarkdownWithEmbeds(
+      path.resolve(path.dirname(resolvedPath), src),
+      resolvedRoot,
+      nextStack,
+    );
+    return embedded || match;
+  });
 }
 
 /** Extract all tables from a block of text and accumulate props */
@@ -216,7 +312,7 @@ export function parseApiSections(content: string, lang: 'en' | 'zh'): Map<string
     const h2Match = chunk.match(/^## (.+)$/m);
     const rawH2 = h2Match ? h2Match[1].trim() : 'API';
     // "API" itself is treated as the root section (no sub-component label)
-    const h2Label = rawH2 === 'API' ? '__api_root__' : cleanLabel(rawH2);
+    const h2Label = rawH2 === 'API' ? '__api_root__' : normalizeSectionLabel(rawH2);
 
     // Split the chunk by ### headings
     const h3Parts = chunk.split(/^(?=### )/m);
@@ -230,7 +326,7 @@ export function parseApiSections(content: string, lang: 'en' | 'zh'): Map<string
         sectionLabel = h2Label === '__api_root__' ? '__main__' : h2Label;
       } else {
         // Content under a ### heading
-        sectionLabel = cleanLabel(h3Match[1].trim());
+        sectionLabel = normalizeSectionLabel(h3Match[1].trim());
       }
 
       const props = extractTablesFromBlock(part, lang);
@@ -274,23 +370,29 @@ export function extractProps(antdDir: string, dirName: string, componentName: st
 
   if (!fs.existsSync(enPath)) return { props: [], subComponentProps: {} };
 
-  const enContent = parseFrontMatter(fs.readFileSync(enPath, 'utf-8')).content;
+  const enContent = readMarkdownWithEmbeds(enPath, antdDir);
   const enSections = parseApiSections(enContent, 'en');
 
   let zhSections = new Map<string, PropData[]>();
   if (fs.existsSync(zhPath)) {
-    const zhContent = parseFrontMatter(fs.readFileSync(zhPath, 'utf-8')).content;
+    const zhContent = readMarkdownWithEmbeds(zhPath, antdDir);
     zhSections = parseApiSections(zhContent, 'zh');
   }
 
   const result: PropsExtractResult = { props: [], subComponentProps: {} };
+  const componentProps: PropData[] = [];
+  const commonProps: PropData[] = [];
 
   for (const [label, enProps] of enSections) {
     const zhProps = zhSections.get(label) || [];
     const merged = mergeProps(enProps, zhProps);
 
     if (isMainSection(label, componentName)) {
-      result.props = [...result.props, ...merged];
+      if (isCommonSection(label)) {
+        commonProps.push(...merged);
+      } else {
+        componentProps.push(...merged);
+      }
     } else {
       // Qualify as "ComponentName.Label" unless it already contains a dot
       const fullName = label.includes('.')
@@ -302,6 +404,8 @@ export function extractProps(antdDir: string, dirName: string, componentName: st
       ];
     }
   }
+
+  result.props = mergeSharedProps(componentProps, commonProps);
 
   return result;
 }

@@ -148,6 +148,8 @@ JSON output (concise):
 
 For components without sub-components (e.g. Button), `subComponentProps` is omitted.
 
+API extraction expands local dumi `<embed src="...">` references before parsing tables, so shared API files (for example Tooltip/Popover/Popconfirm props) are included. When a shared table repeats a component-specific property, non-empty component-specific fields take precedence, missing fields are filled from the shared definition, and the shared definition is not appended as another row. Existing duplicate rows in component-specific tables are preserved.
+
 Most antd components inherit common props (`className`, `style`, `rootClassName`) via [Common Props](https://ant.design/docs/react/common-props). These are included in the output:
 
 - **JSON format**: a `commonProps` array with `name`, `type`, `default`, `description`, `descriptionZh` fields. Omitted for `ConfigProvider` (which does not support common props).
