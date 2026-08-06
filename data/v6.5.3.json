@@ -17887,7 +17887,8 @@
           "type": "Record<[SemanticDOM](#semantic-dom), string> | (info: { props })=> Record<[SemanticDOM](#semantic-dom), string>",
           "default": "-",
           "description": "Customize class for each semantic structure inside the component. Supports object or function.",
-          "descriptionZh": "用于自定义组件内部各语义化结构的 class，支持对象或函数"
+          "descriptionZh": "用于自定义组件内部各语义化结构的 class，支持对象或函数",
+          "since": "5.23.0"
         },
         {
           "name": "content",
@@ -17908,7 +17909,8 @@
           "type": "Record<[SemanticDOM](#semantic-dom), CSSProperties> | (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties>",
           "default": "-",
           "description": "Customize inline style for each semantic structure inside the component. Supports object or function.",
-          "descriptionZh": "用于自定义组件内部各语义化结构的行内 style，支持对象或函数"
+          "descriptionZh": "用于自定义组件内部各语义化结构的行内 style，支持对象或函数",
+          "since": "5.23.0"
         },
         {
           "name": "align",
@@ -17939,14 +17941,6 @@
           "description": "The background color",
           "since": "4.3.0",
           "descriptionZh": "背景颜色"
-        },
-        {
-          "name": "classNames",
-          "type": "Record<[SemanticDOM](#semantic-dom), string> | (info: { props })=> Record<[SemanticDOM](#semantic-dom), string>",
-          "default": "-",
-          "description": "Customize class for each semantic structure inside the component. Supports object or function.",
-          "since": "5.23.0",
-          "descriptionZh": "用于自定义组件内部各语义化结构的 class，支持对象或函数"
         },
         {
           "name": "defaultOpen",
@@ -18031,14 +18025,6 @@
           "default": "`top`",
           "description": "The position of the tooltip relative to the target, which can be one of `top` `left` `right` `bottom` `topLeft` `topRight` `bottomLeft` `bottomRight` `leftTop` `leftBottom` `rightTop` `rightBottom`",
           "descriptionZh": "气泡框位置，可选 `top` `left` `right` `bottom` `topLeft` `topRight` `bottomLeft` `bottomRight` `leftTop` `leftBottom` `rightTop` `rightBottom`"
-        },
-        {
-          "name": "styles",
-          "type": "Record<[SemanticDOM](#semantic-dom), CSSProperties> | (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties>",
-          "default": "-",
-          "description": "Customize inline style for each semantic structure inside the component. Supports object or function.",
-          "since": "5.23.0",
-          "descriptionZh": "用于自定义组件内部各语义化结构的行内 style，支持对象或函数"
         },
         {
           "name": "trigger",
@@ -21163,8 +21149,7 @@
           "type": "boolean",
           "default": "false",
           "description": "Show animation effect",
-          "descriptionZh": "是否展示动画效果",
-          "since": "-"
+          "descriptionZh": "是否展示动画效果"
         },
         {
           "name": "avatar",
@@ -21206,7 +21191,7 @@
           "type": "number | string",
           "default": "-",
           "description": "Set the width of title",
-          "descriptionZh": "设置段落占位图的宽度，若为数组时则为对应的每行宽度，反之则是最后一行的宽度"
+          "descriptionZh": "设置标题占位图的宽度"
         },
         {
           "name": "rows",
@@ -27129,7 +27114,6 @@
           "type": "ReactNode | () => ReactNode",
           "default": "-",
           "description": "The text shown in the tooltip",
-          "since": "-",
           "descriptionZh": "提示文字"
         },
         {

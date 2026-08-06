@@ -46,7 +46,9 @@ function parseTable(tableText: string, lang: 'en' | 'zh'): PropData[] {
     ? headerRow.findIndex((h) => h === '说明' || h === '描述')
     : headerRow.findIndex((h) => h === 'Description');
   const typeIdx = headerRow.findIndex((h) => h === 'Type' || h === '类型');
-  const defaultIdx = headerRow.findIndex((h) => h === 'Default' || h === '默认值');
+  const defaultIdx = headerRow.findIndex(
+    (h) => h === 'Default' || h === 'Default value' || h === '默认值',
+  );
   const versionIdx = headerRow.findIndex((h) => h === 'Version' || h === '版本');
   // "Param" used in some components (e.g. Menu), "Props" (e.g. Drawer), "Argument" alongside the standard "Property"
   let nameIdx = headerRow.findIndex((h) =>
@@ -99,8 +101,9 @@ function parseTableRows(
       prop.description = desc;
     }
 
-    if (versionIdx >= 0 && cells[versionIdx]) {
-      prop.since = cells[versionIdx];
+    const version = versionIdx >= 0 ? cells[versionIdx] : '';
+    if (version && !/^`?-`?$/.test(version)) {
+      prop.since = version;
     }
 
     if (deprecated) {
@@ -140,6 +143,10 @@ function normalizeSectionLabel(raw: string): string {
 
 function isCommonSection(label: string): boolean {
   return label === 'Common API';
+}
+
+function isSharedPropsEmbed(src: string): boolean {
+  return /^sharedProps(?:\.[^.]+)*\.md$/i.test(path.basename(src));
 }
 
 /**
@@ -237,8 +244,14 @@ function readMarkdownWithEmbeds(
   rootDir: string,
   stack = new Set<string>(),
 ): string {
-  const resolvedPath = path.resolve(filePath);
-  const resolvedRoot = path.resolve(rootDir);
+  let resolvedPath: string;
+  let resolvedRoot: string;
+  try {
+    resolvedPath = fs.realpathSync(filePath);
+    resolvedRoot = fs.realpathSync(rootDir);
+  } catch {
+    return '';
+  }
   const relativePath = path.relative(resolvedRoot, resolvedPath);
 
   if (
@@ -246,7 +259,7 @@ function readMarkdownWithEmbeds(
     relativePath.startsWith(`..${path.sep}`) ||
     path.isAbsolute(relativePath) ||
     stack.has(resolvedPath) ||
-    !fs.existsSync(resolvedPath)
+    !fs.statSync(resolvedPath).isFile()
   ) {
     return '';
   }
@@ -262,7 +275,8 @@ function readMarkdownWithEmbeds(
       resolvedRoot,
       nextStack,
     );
-    return embedded || match;
+    if (!embedded) return match;
+    return isSharedPropsEmbed(src) ? `\n### Common API\n\n${embedded}\n` : embedded;
   });
 }
 
@@ -342,10 +356,15 @@ export function parseApiSections(content: string, lang: 'en' | 'zh'): Map<string
 
 /** Merge English and Chinese props into bilingual PropData[] */
 export function mergeProps(enProps: PropData[], zhProps: PropData[]): PropData[] {
-  const zhMap = new Map(zhProps.map((p) => [p.name, p]));
+  const zhMap = new Map<string, PropData[]>();
+  for (const prop of zhProps) {
+    const matches = zhMap.get(prop.name) || [];
+    matches.push(prop);
+    zhMap.set(prop.name, matches);
+  }
 
   return enProps.map((enProp) => {
-    const zhProp = zhMap.get(enProp.name);
+    const zhProp = zhMap.get(enProp.name)?.shift();
     return {
       ...enProp,
       descriptionZh: zhProp?.descriptionZh || zhProp?.description || '',

@@ -15859,21 +15859,21 @@
         {
           "name": "cancelText",
           "type": "string",
-          "default": "-",
+          "default": "`Cancel`",
           "description": "The text of the Cancel button",
           "descriptionZh": "取消按钮文字"
         },
         {
           "name": "disabled",
           "type": "boolean",
-          "default": "-",
+          "default": "false",
           "description": "Whether show popconfirm when click its childrenNode",
           "descriptionZh": "阻止点击 Popconfirm 子元素时弹出确认框"
         },
         {
           "name": "icon",
           "type": "ReactNode",
-          "default": "-",
+          "default": "<ExclamationCircle />",
           "description": "Customize icon of confirmation",
           "descriptionZh": "自定义弹出气泡 Icon 图标"
         },
@@ -15887,21 +15887,21 @@
         {
           "name": "okText",
           "type": "string",
-          "default": "-",
+          "default": "`OK`",
           "description": "The text of the Confirm button",
           "descriptionZh": "确认按钮文字"
         },
         {
           "name": "okType",
           "type": "string",
-          "default": "-",
+          "default": "`primary`",
           "description": "Button `type` of the Confirm button",
           "descriptionZh": "确认按钮类型"
         },
         {
           "name": "showCancel",
           "type": "boolean",
-          "default": "-",
+          "default": "true",
           "description": "Show cancel button",
           "since": "4.18.0",
           "descriptionZh": "是否显示取消按钮"
@@ -16285,13 +16285,6 @@
           "descriptionZh": "背景颜色"
         },
         {
-          "name": "classNames",
-          "type": "Record<[SemanticDOM](#semantic-dom), string> | (info: { props })=> Record<[SemanticDOM](#semantic-dom), string>",
-          "default": "-",
-          "description": "Customize class for each semantic structure inside the component. Supports object or function.",
-          "descriptionZh": "用于自定义组件内部各语义化结构的 class，支持对象或函数"
-        },
-        {
           "name": "defaultOpen",
           "type": "boolean",
           "default": "false",
@@ -16374,13 +16367,6 @@
           "default": "`top`",
           "description": "The position of the tooltip relative to the target, which can be one of `top` `left` `right` `bottom` `topLeft` `topRight` `bottomLeft` `bottomRight` `leftTop` `leftBottom` `rightTop` `rightBottom`",
           "descriptionZh": "气泡框位置，可选 `top` `left` `right` `bottom` `topLeft` `topRight` `bottomLeft` `bottomRight` `leftTop` `leftBottom` `rightTop` `rightBottom`"
-        },
-        {
-          "name": "styles",
-          "type": "Record<[SemanticDOM](#semantic-dom), CSSProperties> | (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties>",
-          "default": "-",
-          "description": "Customize inline style for each semantic structure inside the component. Supports object or function.",
-          "descriptionZh": "用于自定义组件内部各语义化结构的行内 style，支持对象或函数"
         },
         {
           "name": "trigger",
@@ -19489,7 +19475,7 @@
           "type": "number | string",
           "default": "-",
           "description": "Set the width of title",
-          "descriptionZh": "设置段落占位图的宽度，若为数组时则为对应的每行宽度，反之则是最后一行的宽度"
+          "descriptionZh": "设置标题占位图的宽度"
         },
         {
           "name": "rows",
@@ -25062,7 +25048,6 @@
           "type": "ReactNode | () => ReactNode",
           "default": "-",
           "description": "The text shown in the tooltip",
-          "since": "-",
           "descriptionZh": "提示文字"
         },
         {

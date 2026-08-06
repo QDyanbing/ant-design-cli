@@ -14235,21 +14235,21 @@
         {
           "name": "cancelText",
           "type": "string",
-          "default": "-",
+          "default": "`Cancel`",
           "description": "The text of the Cancel button",
           "descriptionZh": "取消按钮文字"
         },
         {
           "name": "disabled",
           "type": "boolean",
-          "default": "-",
+          "default": "false",
           "description": "Whether show popconfirm when click its childrenNode",
           "descriptionZh": "阻止点击 Popconfirm 子元素时弹出确认框"
         },
         {
           "name": "icon",
           "type": "ReactNode",
-          "default": "-",
+          "default": "<ExclamationCircle />",
           "description": "Customize icon of confirmation",
           "descriptionZh": "自定义弹出气泡 Icon 图标"
         },
@@ -14263,21 +14263,21 @@
         {
           "name": "okText",
           "type": "string",
-          "default": "-",
+          "default": "`OK`",
           "description": "The text of the Confirm button",
           "descriptionZh": "确认按钮文字"
         },
         {
           "name": "okType",
           "type": "string",
-          "default": "-",
+          "default": "`primary`",
           "description": "Button `type` of the Confirm button",
           "descriptionZh": "确认按钮类型"
         },
         {
           "name": "showCancel",
           "type": "boolean",
-          "default": "-",
+          "default": "true",
           "description": "Show cancel button",
           "since": "4.18.0",
           "descriptionZh": "是否显示取消按钮"
@@ -22280,7 +22280,6 @@
           "type": "ReactNode | () => ReactNode",
           "default": "-",
           "description": "The text shown in the tooltip",
-          "since": "-",
           "descriptionZh": "提示文字"
         },
         {
