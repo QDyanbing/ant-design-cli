@@ -200,10 +200,17 @@ function fillMissingPropFields(primary: PropData, fallback: PropData): PropData 
   for (const key of Object.keys(fallback) as (keyof PropData)[]) {
     const currentValue = result[key];
     const fallbackValue = fallback[key];
+    const currentIsEmpty =
+      currentValue === undefined ||
+      currentValue === '' ||
+      (key === 'default' && typeof currentValue === 'string' && /^`?-`?$/.test(currentValue));
+    const fallbackIsEmpty =
+      fallbackValue === undefined ||
+      fallbackValue === '' ||
+      (key === 'default' && typeof fallbackValue === 'string' && /^`?-`?$/.test(fallbackValue));
     if (
-      (currentValue === undefined || currentValue === '') &&
-      fallbackValue !== undefined &&
-      fallbackValue !== ''
+      currentIsEmpty &&
+      !fallbackIsEmpty
     ) {
       Object.assign(result, { [key]: fallbackValue });
     }

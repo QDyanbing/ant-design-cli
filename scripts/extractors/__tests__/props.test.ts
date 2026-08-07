@@ -104,7 +104,7 @@ title: Tooltip
 | Property | Description | Type | Default value | Version |
 | --- | --- | --- | --- | --- |
 | title | Tooltip title | ReactNode | - | 5.0.0 |
-| active | Component active | boolean | false | 6.0.0 |
+| active | Component active | boolean | | 6.0.0 |
 | width | Set title width | number \\| string | - | |
 | width | Set paragraph width | number \\| string \\| Array<number \\| string> | - | |
 
