@@ -74,6 +74,13 @@ exports[`token > token --format json (global) 1`] = `
       "descriptionZh": "Ant Design 中按钮和输入框等基础控件的高度"
     },
     {
+      "name": "focusOutline",
+      "type": "boolean",
+      "default": "",
+      "description": "Used to configure whether components show a visible outline when focused",
+      "descriptionZh": "用于配置组件聚焦时是否显示可见描边"
+    },
+    {
       "name": "fontFamily",
       "type": "string",
       "default": "",
@@ -1653,6 +1660,7 @@ exports[`token > token --format markdown (global) 1`] = `
 | colorTextBase | string | - | Used to derive the base variable of the text color gradient. In v5, we added a layer of text color derivation algorithm to produce gradient variables of text color gradient. But please do not use this Seed Token directly in the code! |
 | colorWarning | string | - | Used to represent the warning map token, such as Notification, Alert, etc. Alert or Control component(like Input) will use these map tokens. |
 | controlHeight | number | - | The height of the basic controls such as buttons and input boxes in Ant Design |
+| focusOutline | boolean | - | Used to configure whether components show a visible outline when focused |
 | fontFamily | string | - | The font family of Ant Design prioritizes the default interface font of the system, and provides a set of alternative font libraries that are suitable for screen display to maintain the readability and readability of the font under different platforms and browsers, reflecting the friendly, stable and professional characteristics. |
 | fontFamilyCode | string | - | Code font, used for code, pre and kbd elements in Typography |
 | fontSize | number | - | The most widely used font size in the design system, from which the text gradient will be derived. |
@@ -1893,6 +1901,7 @@ colorSuccess                 string                                       -     
 colorTextBase                string                                       -        Used to derive the base variable of the text color gradient. In v5, we added a layer of text color derivation algorithm to produce gradient variables of text color gradient. But please do not use this Seed Token directly in the code!                                                                                                  
 colorWarning                 string                                       -        Used to represent the warning map token, such as Notification, Alert, etc. Alert or Control component(like Input) will use these map tokens.                                                                                                                                                                                               
 controlHeight                number                                       -        The height of the basic controls such as buttons and input boxes in Ant Design                                                                                                                                                                                                                                                             
+focusOutline                 boolean                                      -        Used to configure whether components show a visible outline when focused                                                                                                                                                                                                                                                                   
 fontFamily                   string                                       -        The font family of Ant Design prioritizes the default interface font of the system, and provides a set of alternative font libraries that are suitable for screen display to maintain the readability and readability of the font under different platforms and browsers, reflecting the friendly, stable and professional characteristics.
 fontFamilyCode               string                                       -        Code font, used for code, pre and kbd elements in Typography                                                                                                                                                                                                                                                                               
 fontSize                     number                                       -        The most widely used font size in the design system, from which the text gradient will be derived.                                                                                                                                                                                                                                         

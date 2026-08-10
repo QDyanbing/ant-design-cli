@@ -275,6 +275,14 @@ exports[`list > list --format json --lang en 1`] = `
     "category": "Data Display"
   },
   {
+    "name": "Listy",
+    "nameZh": "虚拟列表",
+    "description": "A high-performance list that supports grouping and can virtualize long data sets.",
+    "descriptionZh": "高性能列表，支持分组，并可为长列表开启虚拟滚动。",
+    "since": "",
+    "category": "Data Display"
+  },
+  {
     "name": "Masonry",
     "nameZh": "瀑布流",
     "description": "",
@@ -848,6 +856,14 @@ exports[`list > list --format json --lang zh 1`] = `
     "category": "Data Display"
   },
   {
+    "name": "Listy",
+    "nameZh": "虚拟列表",
+    "description": "A high-performance list that supports grouping and can virtualize long data sets.",
+    "descriptionZh": "高性能列表，支持分组，并可为长列表开启虚拟滚动。",
+    "since": "",
+    "category": "Data Display"
+  },
+  {
     "name": "Masonry",
     "nameZh": "瀑布流",
     "description": "",
@@ -1147,7 +1163,7 @@ exports[`list > list --format json --lang zh 1`] = `
 `;
 
 exports[`list > list --format markdown --lang en 1`] = `
-"# antd Components (6.5.4)
+"# antd Components (6.6.0)
 
 | Component | Name (zh) | Description | Since |
 | --- | --- | --- | --- |
@@ -1185,6 +1201,7 @@ exports[`list > list --format markdown --lang en 1`] = `
 | InputNumber | 数字输入框 | Enter a number within certain range with the mouse or keyboard. |  |
 | Layout | 布局 | Handling the overall layout of a page. |  |
 | List | 列表 | Basic list display, which can carry text, lists, pictures, paragraphs. |  |
+| Listy | 虚拟列表 | A high-performance list that supports grouping and can virtualize long data sets. |  |
 | Masonry | 瀑布流 |  |  |
 | Mentions | 提及 | Used to mention someone or something in an input. |  |
 | Menu | 导航菜单 | A versatile menu for navigation. |  |
@@ -1225,7 +1242,7 @@ exports[`list > list --format markdown --lang en 1`] = `
 `;
 
 exports[`list > list --format markdown --lang zh 1`] = `
-"# antd Components (6.5.4)
+"# antd Components (6.6.0)
 
 | 组件 | 中文名 | 描述 | 版本 |
 | --- | --- | --- | --- |
@@ -1263,6 +1280,7 @@ exports[`list > list --format markdown --lang zh 1`] = `
 | InputNumber | 数字输入框 | 通过鼠标或键盘，输入范围内的数值。 |  |
 | Layout | 布局 | 协助进行页面级整体布局。 |  |
 | List | 列表 | 最基础的列表展示，可承载文字、列表、图片、段落。 |  |
+| Listy | 虚拟列表 | 高性能列表，支持分组，并可为长列表开启虚拟滚动。 |  |
 | Masonry | 瀑布流 |  |  |
 | Mentions | 提及 | 用于在输入中提及某人或某事。 |  |
 | Menu | 导航菜单 | 为页面和功能提供导航的菜单列表。 |  |
@@ -1339,6 +1357,7 @@ Input           输入框      Through mouse or keyboard input content, it is th
 InputNumber     数字输入框  Enter a number within certain range with the mouse or keyboard.                                                               
 Layout          布局        Handling the overall layout of a page.                                                                                        
 List            列表        Basic list display, which can carry text, lists, pictures, paragraphs.                                                        
+Listy           虚拟列表    A high-performance list that supports grouping and can virtualize long data sets.                                             
 Masonry         瀑布流                                                                                                                                    
 Mentions        提及        Used to mention someone or something in an input.                                                                             
 Menu            导航菜单    A versatile menu for navigation.                                                                                              
@@ -1415,6 +1434,7 @@ Input           输入框      通过鼠标或键盘输入内容，是最基础�
 InputNumber     数字输入框  通过鼠标或键盘，输入范围内的数值。                                    
 Layout          布局        协助进行页面级整体布局。                                              
 List            列表        最基础的列表展示，可承载文字、列表、图片、段落。                      
+Listy           虚拟列表    高性能列表，支持分组，并可为长列表开启虚拟滚动。                      
 Masonry         瀑布流                                                                            
 Mentions        提及        用于在输入中提及某人或某事。                                          
 Menu            导航菜单    为页面和功能提供导航的菜单列表。                                      
