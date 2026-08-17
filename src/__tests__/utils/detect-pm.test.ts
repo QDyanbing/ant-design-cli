@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
-  inferPackageManagerFromPath,
   detectPackageManager,
   findAntdBinaryPath,
+  inferPackageManagerFromPath,
+  isPackageManager,
+  PACKAGE_MANAGERS,
   UPGRADE_COMMANDS,
 } from '../../utils/detect-pm.js';
 import type { PackageManager } from '../../utils/detect-pm.js';
@@ -13,6 +15,18 @@ vi.mock('node:child_process', () => ({
 }));
 
 const mockExecFileSync = vi.mocked(childProcess.execFileSync);
+
+describe('isPackageManager', () => {
+  it('accepts every supported package manager', () => {
+    for (const packageManager of PACKAGE_MANAGERS) {
+      expect(isPackageManager(packageManager)).toBe(true);
+    }
+  });
+
+  it.each(['corepack', '', undefined, null, 1])('rejects unsupported value %s', (value) => {
+    expect(isPackageManager(value)).toBe(false);
+  });
+});
 
 describe('inferPackageManagerFromPath', () => {
   it('detects utoo from .utoo path', () => {

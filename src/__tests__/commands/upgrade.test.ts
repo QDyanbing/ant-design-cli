@@ -19,19 +19,32 @@ vi.mock('../../utils/update-check.js', () => ({
   checkForUpdate: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock detect-pm module
-vi.mock('../../utils/detect-pm.js', () => ({
-  detectPackageManager: vi.fn(() => null),
-  UPGRADE_COMMANDS: {
-    npm: { cmd: 'npm', args: ['install', '-g', '@ant-design/cli@latest'] },
-    yarn: { cmd: 'yarn', args: ['global', 'add', '@ant-design/cli@latest'] },
-    pnpm: { cmd: 'pnpm', args: ['add', '-g', '@ant-design/cli@latest'] },
-    bun: { cmd: 'bun', args: ['add', '-g', '@ant-design/cli@latest'] },
-    cnpm: { cmd: 'cnpm', args: ['install', '-g', '@ant-design/cli@latest'] },
-    utoo: { cmd: 'ut', args: ['install', '-g', '@ant-design/cli@latest'] },
+vi.mock('../../utils/store.js', () => ({
+  configStore: {
+    get: vi.fn(),
+    set: vi.fn(),
   },
-  inferPackageManagerFromPath: vi.fn(),
 }));
+
+// Mock detect-pm module
+vi.mock('../../utils/detect-pm.js', () => {
+  const packageManagers = ['npm', 'yarn', 'pnpm', 'bun', 'cnpm', 'utoo'];
+  return {
+    detectPackageManager: vi.fn(() => null),
+    PACKAGE_MANAGERS: packageManagers,
+    isPackageManager: (value: unknown) =>
+      typeof value === 'string' && packageManagers.includes(value),
+    UPGRADE_COMMANDS: {
+      npm: { cmd: 'npm', args: ['install', '-g', '@ant-design/cli@latest'] },
+      yarn: { cmd: 'yarn', args: ['global', 'add', '@ant-design/cli@latest'] },
+      pnpm: { cmd: 'pnpm', args: ['add', '-g', '@ant-design/cli@latest'] },
+      bun: { cmd: 'bun', args: ['add', '-g', '@ant-design/cli@latest'] },
+      cnpm: { cmd: 'cnpm', args: ['install', '-g', '@ant-design/cli@latest'] },
+      utoo: { cmd: 'ut', args: ['install', '-g', '@ant-design/cli@latest'] },
+    },
+    inferPackageManagerFromPath: vi.fn(),
+  };
+});
 
 // Mock version module so we can control compare() return value
 vi.mock('../../data/version.js', async (importOriginal) => {
@@ -48,6 +61,7 @@ import { spawn, execFile } from 'node:child_process';
 import { fetchLatestVersion } from '../../utils/update-check.js';
 import { detectPackageManager } from '../../utils/detect-pm.js';
 import { compare, valid } from '../../data/version.js';
+import { configStore } from '../../utils/store.js';
 
 const mockSpawn = vi.mocked(spawn);
 const mockExecFile = vi.mocked(execFile);
@@ -55,6 +69,8 @@ const mockFetchLatestVersion = vi.mocked(fetchLatestVersion);
 const mockDetectPackageManager = vi.mocked(detectPackageManager);
 const mockCompare = vi.mocked(compare);
 const mockValid = vi.mocked(valid);
+const mockConfigGet = vi.mocked(configStore.get);
+const mockConfigSet = vi.mocked(configStore.set);
 
 function createMockChildProcess(exitCode: number): ChildProcess {
   const cp = new EventEmitter() as ChildProcess;
@@ -78,6 +94,7 @@ describe('upgrade command', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDetectPackageManager.mockReturnValue('npm');
+    mockConfigGet.mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -125,6 +142,55 @@ describe('upgrade command', () => {
     expect(result.stdout).toContain('npm install -g');
     expect(result.stdout).toContain('Successfully upgraded to v99.0.0');
     expect(result.exitCode).toBe(0);
+  });
+
+  it('persists and uses an explicit package manager override', async () => {
+    mockFetchLatestVersion.mockResolvedValue('99.0.0');
+    mockSpawn.mockReturnValue(createMockChildProcess(0));
+    mockExecFile.mockImplementation((_cmd: unknown, _args: unknown, _opts: unknown, cb: unknown) => {
+      (cb as (err: null, stdout: string) => void)(null, '99.0.0');
+      return {} as never;
+    });
+
+    const result = await runCLI('upgrade', '--package-manager', 'pnpm');
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('pnpm add -g @ant-design/cli@latest');
+    expect(mockConfigSet).toHaveBeenCalledWith('packageManager', 'pnpm');
+    expect(mockConfigGet).not.toHaveBeenCalled();
+  });
+
+  it('prefers the saved package manager over path detection', async () => {
+    mockConfigGet.mockReturnValue('yarn');
+    mockFetchLatestVersion.mockResolvedValue('99.0.0');
+    mockSpawn.mockReturnValue(createMockChildProcess(0));
+    mockExecFile.mockImplementation((_cmd: unknown, _args: unknown, _opts: unknown, cb: unknown) => {
+      (cb as (err: null, stdout: string) => void)(null, '99.0.0');
+      return {} as never;
+    });
+
+    const result = await runCLI('upgrade');
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('yarn global add @ant-design/cli@latest');
+    expect(mockDetectPackageManager).not.toHaveBeenCalled();
+  });
+
+  it('ignores an invalid saved package manager and falls back to path detection', async () => {
+    mockConfigGet.mockReturnValue('corepack' as never);
+    mockDetectPackageManager.mockReturnValue('pnpm');
+    mockFetchLatestVersion.mockResolvedValue('99.0.0');
+    mockSpawn.mockReturnValue(createMockChildProcess(0));
+    mockExecFile.mockImplementation((_cmd: unknown, _args: unknown, _opts: unknown, cb: unknown) => {
+      (cb as (err: null, stdout: string) => void)(null, '99.0.0');
+      return {} as never;
+    });
+
+    const result = await runCLI('upgrade');
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('pnpm add -g @ant-design/cli@latest');
+    expect(mockDetectPackageManager).toHaveBeenCalledOnce();
   });
 
   it('upgrades successfully via yarn (JSON format)', async () => {
