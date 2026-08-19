@@ -38,6 +38,13 @@ describe('demo', () => {
     expect(result.stderr).not.toContain('using bundled snapshot');
   });
 
+  it('should warn again on each CLI invocation with the same fallback version', async () => {
+    const first = await runCLI('demo', 'Button', 'basic', '--version', '5.3.4', '--format', 'json');
+    const second = await runCLI('demo', 'Button', 'basic', '--version', '5.3.4', '--format', 'json');
+    expect(first.stderr).toContain('using bundled snapshot 5.3.3');
+    expect(second.stderr).toContain('using bundled snapshot 5.3.3');
+  });
+
   it('should handle demo not found', async () => {
     const result = await runCLI('demo', 'Button', 'nonexistent');
     expect(result.exitCode).toBe(1);

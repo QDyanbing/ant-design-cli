@@ -287,7 +287,7 @@ describe('data/loader', () => {
       spy.mockRestore();
     });
 
-    it('deduplicates repeated fallback warnings in the same process', async () => {
+    it('deduplicates repeated fallback warnings within the same CLI invocation', async () => {
       const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
       enableVersionFallbackWarning(true);
       const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
@@ -297,15 +297,31 @@ describe('data/loader', () => {
       spy.mockRestore();
     });
 
+    it('warns again when fallback warning is re-enabled for a new CLI invocation', async () => {
+      const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
+      const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      enableVersionFallbackWarning(true);
+      load('5.3.4');
+      enableVersionFallbackWarning(true);
+      load('5.3.4');
+      expect(spy).toHaveBeenCalledTimes(2);
+      spy.mockRestore();
+    });
+
     it('does not color warnings when NO_COLOR is set', async () => {
       const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
       enableVersionFallbackWarning(true);
-      process.env.NO_COLOR = '1';
+      const previousNoColor = process.env.NO_COLOR;
       const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
-      load('5.3.4');
-      expect(String(spy.mock.calls[0]?.[0])).not.toContain('\x1b[33m');
-      spy.mockRestore();
-      delete process.env.NO_COLOR;
+      try {
+        process.env.NO_COLOR = '1';
+        load('5.3.4');
+        expect(String(spy.mock.calls[0]?.[0])).not.toContain('\x1b[33m');
+      } finally {
+        spy.mockRestore();
+        if (previousNoColor === undefined) delete process.env.NO_COLOR;
+        else process.env.NO_COLOR = previousNoColor;
+      }
     });
   });
 

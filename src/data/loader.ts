@@ -13,6 +13,7 @@ let versionFallbackWarningEnabled = false;
 /** Toggle stderr warnings when a requested version resolves to a different bundled snapshot. */
 export function enableVersionFallbackWarning(enabled: boolean): void {
   versionFallbackWarningEnabled = enabled;
+  warnedVersionFallbacks.clear();
 }
 
 function versionsEquivalent(a: string, b: string): boolean {
