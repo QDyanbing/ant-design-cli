@@ -229,7 +229,7 @@ describe('data/loader', () => {
 
     it('warns on stderr when --version resolves to a different bundled snapshot', async () => {
       const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
-      enableVersionFallbackWarning();
+      enableVersionFallbackWarning(true);
       const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
       const store = load('5.3.4');
       expect(store.version).toBe('5.3.3');
@@ -241,7 +241,7 @@ describe('data/loader', () => {
 
     it('colors the warning on stderr TTY', async () => {
       const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
-      enableVersionFallbackWarning();
+      enableVersionFallbackWarning(true);
       const originalIsTTY = process.stderr.isTTY;
       const originalNoColor = process.env.NO_COLOR;
       const originalTerm = process.env.TERM;
@@ -265,6 +265,47 @@ describe('data/loader', () => {
       load('5.3.4');
       expect(spy).not.toHaveBeenCalled();
       spy.mockRestore();
+    });
+
+    it('warns when requested major has no bundled snapshot', async () => {
+      const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
+      enableVersionFallbackWarning(true);
+      const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      load('99.0.0');
+      expect(spy).toHaveBeenCalledWith(
+        expect.stringContaining('[antd-cli] Warning: Version 99.0.0 is not available; no bundled snapshot found.'),
+      );
+      spy.mockRestore();
+    });
+
+    it('does not warn when requested version matches the bundled snapshot', async () => {
+      const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
+      enableVersionFallbackWarning(true);
+      const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      load('5.3.3');
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('deduplicates repeated fallback warnings in the same process', async () => {
+      const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
+      enableVersionFallbackWarning(true);
+      const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      load('5.3.4');
+      load('5.3.4');
+      expect(spy).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
+    });
+
+    it('does not color warnings when NO_COLOR is set', async () => {
+      const { enableVersionFallbackWarning, loadMetadataForVersion: load } = await loadFreshLoader();
+      enableVersionFallbackWarning(true);
+      process.env.NO_COLOR = '1';
+      const spy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      load('5.3.4');
+      expect(String(spy.mock.calls[0]?.[0])).not.toContain('\x1b[33m');
+      spy.mockRestore();
+      delete process.env.NO_COLOR;
     });
   });
 

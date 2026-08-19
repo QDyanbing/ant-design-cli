@@ -10,9 +10,9 @@ import { compare } from './version.js';
 const warnedVersionFallbacks = new Set<string>();
 let versionFallbackWarningEnabled = false;
 
-/** Enable stderr warnings when a requested version resolves to a different bundled snapshot. */
-export function enableVersionFallbackWarning(): void {
-  versionFallbackWarningEnabled = true;
+/** Toggle stderr warnings when a requested version resolves to a different bundled snapshot. */
+export function enableVersionFallbackWarning(enabled: boolean): void {
+  versionFallbackWarningEnabled = enabled;
 }
 
 function versionsEquivalent(a: string, b: string): boolean {
@@ -29,7 +29,10 @@ function colorizeStderrWarning(message: string): string {
 }
 
 function warnVersionFallback(requested: string, store: MetadataStore): void {
-  if (!versionFallbackWarningEnabled || versionsEquivalent(requested, store.version)) return;
+  if (!versionFallbackWarningEnabled) return;
+
+  const noBundledSnapshot = store.components.length === 0;
+  if (!noBundledSnapshot && versionsEquivalent(requested, store.version)) return;
 
   const key = `${requested}|${store.version}|${store.components.length}`;
   if (warnedVersionFallbacks.has(key)) return;

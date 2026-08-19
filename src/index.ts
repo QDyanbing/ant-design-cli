@@ -84,9 +84,7 @@ export function createProgram(): Command {
   // Validate global options before any command runs
   program.hook('preAction', () => {
     const opts = program.opts<GlobalOptions>();
-    if (opts.version) {
-      enableVersionFallbackWarning();
-    }
+    enableVersionFallbackWarning(Boolean(opts.version));
     const validFormats = ['json', 'text', 'markdown'];
     const validLangs = ['en', 'zh'];
     if (opts.format && !validFormats.includes(opts.format)) {

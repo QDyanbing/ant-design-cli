@@ -32,6 +32,12 @@ describe('demo', () => {
     expect(data.demo).toBe('basic');
   });
 
+  it('should not warn on a later command without --version in the same process', async () => {
+    await runCLI('demo', 'Button', 'basic', '--version', '5.3.4');
+    const result = await runCLI('demo', 'Button', 'basic', '--format', 'json');
+    expect(result.stderr).not.toContain('using bundled snapshot');
+  });
+
   it('should handle demo not found', async () => {
     const result = await runCLI('demo', 'Button', 'nonexistent');
     expect(result.exitCode).toBe(1);
