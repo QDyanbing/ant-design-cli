@@ -18,6 +18,7 @@ import { registerMcpCommand } from './commands/mcp.js';
 import { registerSetupCommand } from './commands/setup.js';
 import { checkForUpdate } from './utils/update-check.js';
 import { createHelpBanner } from './output/banner.js';
+import { enableVersionFallbackWarning } from './data/loader.js';
 import type { GlobalOptions } from './types.js';
 declare const __CLI_VERSION__: string;
 const CLI_VERSION = __CLI_VERSION__;
@@ -83,6 +84,9 @@ export function createProgram(): Command {
   // Validate global options before any command runs
   program.hook('preAction', () => {
     const opts = program.opts<GlobalOptions>();
+    if (opts.version) {
+      enableVersionFallbackWarning();
+    }
     const validFormats = ['json', 'text', 'markdown'];
     const validLangs = ['en', 'zh'];
     if (opts.format && !validFormats.includes(opts.format)) {

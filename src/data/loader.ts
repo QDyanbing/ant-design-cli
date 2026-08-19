@@ -5,6 +5,41 @@ import { fileURLToPath } from 'node:url';
 import type { MetadataStore, ComponentData, PropData, CLIError } from '../types.js';
 import { createError, fuzzyMatch, ErrorCodes } from '../output/error.js';
 import { readJson } from '../utils/json.js';
+import { compare } from './version.js';
+
+const warnedVersionFallbacks = new Set<string>();
+let versionFallbackWarningEnabled = false;
+
+/** Enable stderr warnings when a requested version resolves to a different bundled snapshot. */
+export function enableVersionFallbackWarning(): void {
+  versionFallbackWarningEnabled = true;
+}
+
+function versionsEquivalent(a: string, b: string): boolean {
+  return compare(a, b) === 0;
+}
+
+function colorizeStderrWarning(message: string): string {
+  const useColor = (process.env.FORCE_COLOR && process.env.FORCE_COLOR !== '0')
+    || (!process.env.NO_COLOR && process.stderr.isTTY && process.env.TERM !== 'dumb');
+  if (!useColor) return message;
+
+  const text = message.endsWith('\n') ? message.slice(0, -1) : message;
+  return `\x1b[1m\x1b[33m${text}\x1b[0m${message.endsWith('\n') ? '\n' : ''}`;
+}
+
+function warnVersionFallback(requested: string, store: MetadataStore): void {
+  if (!versionFallbackWarningEnabled || versionsEquivalent(requested, store.version)) return;
+
+  const key = `${requested}|${store.version}|${store.components.length}`;
+  if (warnedVersionFallbacks.has(key)) return;
+  warnedVersionFallbacks.add(key);
+
+  const message = store.components.length === 0
+    ? `[antd-cli] Warning: Version ${requested} is not available; no bundled snapshot found.\n`
+    : `[antd-cli] Warning: Version ${requested} is not available; using bundled snapshot ${store.version} instead.\n`;
+  process.stderr.write(colorizeStderrWarning(message));
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -99,7 +134,10 @@ const metadataCache = new Map<string, MetadataStore>();
 
 export function loadMetadataForVersion(version: string): MetadataStore {
   const cached = metadataCache.get(version);
-  if (cached) return cached;
+  if (cached) {
+    warnVersionFallback(version, cached);
+    return cached;
+  }
 
   const result = loadMetadataForVersionUncached(version);
   metadataCache.set(version, result);
@@ -108,6 +146,7 @@ export function loadMetadataForVersion(version: string): MetadataStore {
     if (oldestKey === undefined) break;
     metadataCache.delete(oldestKey);
   }
+  warnVersionFallback(version, result);
   return result;
 }
 

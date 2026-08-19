@@ -22,6 +22,16 @@ describe('demo', () => {
     expect(data.code).toContain('import');
   });
 
+  it('should warn on stderr but still output when --version falls back', async () => {
+    const result = await runCLI('demo', 'Button', 'basic', '--version', '5.3.4', '--format', 'json');
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr).toContain('5.3.4');
+    expect(result.stderr).toContain('5.3.3');
+    const data = JSON.parse(result.stdout);
+    expect(data.component).toBe('Button');
+    expect(data.demo).toBe('basic');
+  });
+
   it('should handle demo not found', async () => {
     const result = await runCLI('demo', 'Button', 'nonexistent');
     expect(result.exitCode).toBe(1);
